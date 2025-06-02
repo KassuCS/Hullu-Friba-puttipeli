@@ -74,6 +74,7 @@
 
   <div id="result"></div>
 
+  <button id="sendToSheetsBtn" style="display: none;" onclick="sendToGoogleSheets()">Send to Google Sheets</button>
   <button id="newGameBtn" style="display: none;" onclick="window.location.reload()">New Game</button>
 
   <script>
@@ -147,6 +148,7 @@
       let overallPercentage = (totalPuttsMade / totalPuttsAttempted) * 100;
       document.getElementById('game').style.display = 'none';
       document.getElementById('result').style.display = 'block';
+      document.getElementById('sendToSheetsBtn').style.display = 'inline-block';
       document.getElementById('newGameBtn').style.display = 'inline-block';
 
       document.getElementById('result').innerHTML = `<h2>Game Over!</h2>
@@ -160,7 +162,30 @@
       document.getElementById('currentDistance').textContent = currentDistance;
       document.getElementById('puttsMade').textContent = puttsMade;
     }
-  </script>
 
+    function sendToGoogleSheets() {
+      const url = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec";
+
+      for (let distance in distanceStats) {
+        const stats = distanceStats[distance];
+        const data = {
+          distance: distance,
+          puttsMade: stats.made,
+          puttsAttempted: stats.attempted
+        };
+
+        fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+      }
+
+      alert("Scores per distance sent to Google Sheets!");
+    }
+  </script>
 </body>
 </html>
