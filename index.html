@@ -73,8 +73,9 @@
   </div>
 
   <div id="result"></div>
-  <button id="downloadBtn" style="display: none;" onclick="downloadScores()">Download My Scores</button>
-  <button id="newGameBtn" style="display: none;" onclick="startNewGame()">New Game</button>
+
+  <button id="sendToSheetsBtn" style="display: none;" onclick="sendToGoogleSheets()">Send to Google Sheets</button>
+  <button id="newGameBtn" style="display: none;" onclick="window.location.reload()">New Game</button>
 
   <script>
     let puttsPerRound, minDistance, maxDistance, currentDistance;
@@ -116,7 +117,6 @@
         alert("Enter a valid number between 0 and " + puttsPerRound);
         return;
       }
-
       totalPuttsMade += puttsMade;
       totalPuttsAttempted += puttsPerRound;
       totalRounds++;
@@ -145,10 +145,9 @@
 
     function endGame() {
       let overallPercentage = (totalPuttsMade / totalPuttsAttempted) * 100;
-
       document.getElementById('game').style.display = 'none';
       document.getElementById('result').style.display = 'block';
-      document.getElementById('downloadBtn').style.display = 'inline-block';
+      document.getElementById('sendToSheetsBtn').style.display = 'inline-block';
       document.getElementById('newGameBtn').style.display = 'inline-block';
 
       document.getElementById('result').innerHTML = `<h2>Game Over!</h2>
@@ -163,32 +162,29 @@
       document.getElementById('puttsMade').textContent = puttsMade;
     }
 
-    function downloadScores() {
-      let content = `Total Rounds: ${totalRounds}\n`;
-      content += `Total Putts Made: ${totalPuttsMade}\n`;
-      content += `Total Putts Attempted: ${totalPuttsAttempted}\n`;
-      content += `Final Accuracy: ${(totalPuttsMade / totalPuttsAttempted * 100).toFixed(1)}%\n\n`;
-      content += `Accuracy by Distance:\n`;
+    function sendToGoogleSheets() {
+      const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
 
-      for (let dist in distanceStats) {
-        const d = distanceStats[dist];
-        const perc = (d.made / d.attempted * 100).toFixed(1);
-        content += `${dist}m: ${perc}% (${d.made}/${d.attempted})\n`;
-      }
+      const data = {
+        distance: currentDistance,
+        puttsMade: totalPuttsMade,
+        puttsAttempted: totalPuttsAttempted
+      };
 
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'putting_scores.txt';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function startNewGame() {
-      location.reload();
+      fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }).then(() => {
+        alert("Scores sent to Google Sheets!");
+      }).catch((error) => {
+        console.error("Error sending data:", error);
+        alert("Error sending scores.");
+      });
     }
   </script>
-
 </body>
 </html>
