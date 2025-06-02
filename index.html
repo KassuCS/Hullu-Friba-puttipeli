@@ -1,168 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Putting Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            font-size: 20px;
-        }
-        button {
-            font-size: 24px;
-            padding: 15px 30px;
-            margin: 10px;
-            cursor: pointer;
-        }
-        .dial-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 80px);
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .dial-pad button {
-            font-size: 32px;
-            width: 80px;
-            height: 80px;
-        }
-        #game, #result {
-            display: none;
-        }
-        input {
-            font-size: 24px;
-            width: 100px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Putting Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      font-size: 20px;
+    }
+    button {
+      font-size: 24px;
+      padding: 15px 30px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .dial-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .dial-pad button {
+      font-size: 32px;
+      width: 80px;
+      height: 80px;
+    }
+    #game, #result {
+      display: none;
+    }
+    input {
+      font-size: 24px;
+      width: 100px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="setup">
-        <h2>Setup Your Game</h2>
-        <label>Putts per round:</label>
-        <input type="number" id="puttsPerRound" min="1" value="5"><br><br>
-        <label>Starting distance (min-max in meters):</label>
-        <input type="number" id="minDistance" min="1" value="5"> -
-        <input type="number" id="maxDistance" min="1" value="10"><br><br>
-        <button onclick="startGame()">Start Game</button>
+  <div id="setup">
+    <h2>Setup Your Game</h2>
+    <label>Putts per round:</label>
+    <input type="number" id="puttsPerRound" min="1" value="5"><br><br>
+    <label>Starting distance (min-max in meters):</label>
+    <input type="number" id="minDistance" min="1" value="5"> -
+    <input type="number" id="maxDistance" min="1" value="10"><br><br>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <div id="game">
+    <h2>Current Distance: <span id="currentDistance"></span>m</h2>
+    <h3>Enter Putts Made:</h3>
+    <input type="text" id="puttsMadeInput" readonly>
+    <div class="dial-pad">
+      <button onclick="dialNumber(1)">1</button>
+      <button onclick="dialNumber(2)">2</button>
+      <button onclick="dialNumber(3)">3</button>
+      <button onclick="dialNumber(4)">4</button>
+      <button onclick="dialNumber(5)">5</button>
+      <button onclick="dialNumber(6)">6</button>
+      <button onclick="dialNumber(7)">7</button>
+      <button onclick="dialNumber(8)">8</button>
+      <button onclick="dialNumber(9)">9</button>
+      <button onclick="backspace()">⌫</button>
+      <button onclick="dialNumber(0)">0</button>
+      <button onclick="submitPutts()">✔</button>
     </div>
+    <h3>Putts Made: <span id="puttsMade">0</span> / <span id="puttsPerRoundDisplay"></span></h3>
+    <button onclick="endGame()">End Game</button>
+  </div>
 
-    <div id="game">
-        <h2>Current Distance: <span id="currentDistance"></span>m</h2>
-        <h3>Enter Putts Made:</h3>
-        <input type="text" id="puttsMadeInput" readonly>
-        <div class="dial-pad">
-            <button onclick="dialNumber(1)">1</button>
-            <button onclick="dialNumber(2)">2</button>
-            <button onclick="dialNumber(3)">3</button>
-            <button onclick="dialNumber(4)">4</button>
-            <button onclick="dialNumber(5)">5</button>
-            <button onclick="dialNumber(6)">6</button>
-            <button onclick="dialNumber(7)">7</button>
-            <button onclick="dialNumber(8)">8</button>
-            <button onclick="dialNumber(9)">9</button>
-            <button onclick="backspace()">⌫</button>
-            <button onclick="dialNumber(0)">0</button>
-            <button onclick="submitPutts()">✔</button>
-        </div>
-        <h3>Putts Made: <span id="puttsMade">0</span> / <span id="puttsPerRoundDisplay"></span></h3>
-        <button onclick="endGame()">End Game</button>
-    </div>
+  <div id="result"></div>
+  <button id="downloadBtn" style="display: none;" onclick="downloadScores()">Download My Scores</button>
+  <button id="newGameBtn" style="display: none;" onclick="startNewGame()">New Game</button>
 
-    <div id="result"></div>
-    <button id="statsBtn" style="display: none;" onclick="openStatsPage()">View Stats</button>
+  <script>
+    let puttsPerRound, minDistance, maxDistance, currentDistance;
+    let puttsMade = 0;
+    let totalRounds = 0;
+    let totalPuttsMade = 0;
+    let totalPuttsAttempted = 0;
+    let distanceStats = {};
 
-    <script>
-        let puttsPerRound, minDistance, maxDistance, currentDistance;
-        let puttsMade = 0;
-        let totalRounds = 0;
-        let totalPuttsMade = 0;
-        let totalPuttsAttempted = 0;
-        let distanceStats = {};
+    function startGame() {
+      puttsPerRound = parseInt(document.getElementById('puttsPerRound').value);
+      minDistance = parseInt(document.getElementById('minDistance').value);
+      maxDistance = parseInt(document.getElementById('maxDistance').value);
+      currentDistance = minDistance;
 
-        function startGame() {
-            puttsPerRound = parseInt(document.getElementById('puttsPerRound').value);
-            minDistance = parseInt(document.getElementById('minDistance').value);
-            maxDistance = parseInt(document.getElementById('maxDistance').value);
-            currentDistance = minDistance;
+      if (minDistance >= maxDistance || puttsPerRound < 1) {
+        alert("Invalid input! Make sure min distance is less than max and putts per round is at least 1.");
+        return;
+      }
 
-            if (minDistance >= maxDistance || puttsPerRound < 1) {
-                alert("Invalid input! Make sure min distance is less than max and putts per round is at least 1.");
-                return;
-            }
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+      document.getElementById('puttsPerRoundDisplay').textContent = puttsPerRound;
+      updateGameDisplay();
+    }
 
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('puttsPerRoundDisplay').textContent = puttsPerRound;
-            updateGameDisplay();
-        }
+    function dialNumber(num) {
+      document.getElementById('puttsMadeInput').value += num;
+    }
 
-        function dialNumber(num) {
-            document.getElementById('puttsMadeInput').value += num;
-        }
+    function backspace() {
+      let input = document.getElementById('puttsMadeInput');
+      input.value = input.value.slice(0, -1);
+    }
 
-        function backspace() {
-            let input = document.getElementById('puttsMadeInput');
-            input.value = input.value.slice(0, -1);
-        }
+    function submitPutts() {
+      puttsMade = parseInt(document.getElementById('puttsMadeInput').value);
+      if (isNaN(puttsMade) || puttsMade < 0 || puttsMade > puttsPerRound) {
+        alert("Enter a valid number between 0 and " + puttsPerRound);
+        return;
+      }
 
-        function submitPutts() {
-            puttsMade = parseInt(document.getElementById('puttsMadeInput').value);
-            if (isNaN(puttsMade) || puttsMade < 0 || puttsMade > puttsPerRound) {
-                alert("Enter a valid number between 0 and " + puttsPerRound);
-                return;
-            }
-            totalPuttsMade += puttsMade;
-            totalPuttsAttempted += puttsPerRound;
-            totalRounds++;
+      totalPuttsMade += puttsMade;
+      totalPuttsAttempted += puttsPerRound;
+      totalRounds++;
 
-            if (!distanceStats[currentDistance]) {
-                distanceStats[currentDistance] = { made: 0, attempted: 0 };
-            }
-            distanceStats[currentDistance].made += puttsMade;
-            distanceStats[currentDistance].attempted += puttsPerRound;
-            
-            endRound();
-        }
+      if (!distanceStats[currentDistance]) {
+        distanceStats[currentDistance] = { made: 0, attempted: 0 };
+      }
+      distanceStats[currentDistance].made += puttsMade;
+      distanceStats[currentDistance].attempted += puttsPerRound;
 
-        function endRound() {
-            let percentage = (puttsMade / puttsPerRound) * 100;
+      endRound();
+    }
 
-            if (percentage >= 70 && currentDistance < maxDistance) {
-                currentDistance++;
-            } else if (percentage < 40 && currentDistance > minDistance) {
-                currentDistance--;
-            }
+    function endRound() {
+      let percentage = (puttsMade / puttsPerRound) * 100;
 
-            document.getElementById('puttsMadeInput').value = "";
-            updateGameDisplay();
-        }
+      if (percentage >= 70 && currentDistance < maxDistance) {
+        currentDistance++;
+      } else if (percentage < 40 && currentDistance > minDistance) {
+        currentDistance--;
+      }
 
-        function endGame() {
-            let overallPercentage = (totalPuttsMade / totalPuttsAttempted) * 100;
-            localStorage.setItem("distanceStats", JSON.stringify(distanceStats));
-            document.getElementById('game').style.display = 'none';
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('statsBtn').style.display = 'block';
-            document.getElementById('result').innerHTML = `<h2>Game Over!</h2>
-                <p>Total Rounds: ${totalRounds}</p>
-                <p>Total Putts Made: ${totalPuttsMade}</p>
-                <p>Total Putts Attempted: ${totalPuttsAttempted}</p>
-                <p>Final Accuracy: ${overallPercentage.toFixed(1)}%</p>`;
-        }
+      document.getElementById('puttsMadeInput').value = "";
+      updateGameDisplay();
+    }
 
-        function updateGameDisplay() {
-            document.getElementById('currentDistance').textContent = currentDistance;
-            document.getElementById('puttsMade').textContent = puttsMade;
-        }
+    function endGame() {
+      let overallPercentage = (totalPuttsMade / totalPuttsAttempted) * 100;
 
-        function openStatsPage() {
-            window.location.href = "stats.html";
-        }
-    </script>
+      document.getElementById('game').style.display = 'none';
+      document.getElementById('result').style.display = 'block';
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+      document.getElementById('newGameBtn').style.display = 'inline-block';
+
+      document.getElementById('result').innerHTML = `<h2>Game Over!</h2>
+        <p>Total Rounds: ${totalRounds}</p>
+        <p>Total Putts Made: ${totalPuttsMade}</p>
+        <p>Total Putts Attempted: ${totalPuttsAttempted}</p>
+        <p>Final Accuracy: ${overallPercentage.toFixed(1)}%</p>`;
+    }
+
+    function updateGameDisplay() {
+      document.getElementById('currentDistance').textContent = currentDistance;
+      document.getElementById('puttsMade').textContent = puttsMade;
+    }
+
+    function downloadScores() {
+      let content = `Total Rounds: ${totalRounds}\n`;
+      content += `Total Putts Made: ${totalPuttsMade}\n`;
+      content += `Total Putts Attempted: ${totalPuttsAttempted}\n`;
+      content += `Final Accuracy: ${(totalPuttsMade / totalPuttsAttempted * 100).toFixed(1)}%\n\n`;
+      content += `Accuracy by Distance:\n`;
+
+      for (let dist in distanceStats) {
+        const d = distanceStats[dist];
+        const perc = (d.made / d.attempted * 100).toFixed(1);
+        content += `${dist}m: ${perc}% (${d.made}/${d.attempted})\n`;
+      }
+
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'putting_scores.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function startNewGame() {
+      location.reload();
+    }
+  </script>
 
 </body>
 </html>
