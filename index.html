@@ -163,29 +163,29 @@
       document.getElementById('puttsMade').textContent = puttsMade;
     }
 
-    function sendToGoogleSheets() {
-      const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
+function sendToGoogleSheets() {
+  const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
 
-      for (let distance in distanceStats) {
-        const stats = distanceStats[distance];
-        const data = {
-          distance: distance,
-          puttsMade: stats.made,
-          puttsAttempted: stats.attempted
-        };
+  const allStats = [];
+  for (let distance in distanceStats) {
+    const stats = distanceStats[distance];
+    allStats.push({
+      distance: parseInt(distance),
+      puttsMade: stats.made,
+      puttsAttempted: stats.attempted
+    });
+  }
 
-        fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-      }
-
-      alert("Scores per distance sent to Google Sheets!");
-    }
-  </script>
-</body>
-</html>
+  fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ stats: allStats }),
+  }).then(() => {
+    alert("All distances sent to Google Sheets!");
+  }).catch((err) => {
+    console.error("Error:", err);
+    alert("Failed to send data.");
+  });
+}
