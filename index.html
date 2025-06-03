@@ -164,28 +164,22 @@
     }
 
     function sendToGoogleSheets() {
-      const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
+  const endpoint = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
 
-      for (let distance in distanceStats) {
-        const stats = distanceStats[distance];
-        const data = {
-          distance: distance,
-          puttsMade: stats.made,
-          puttsAttempted: stats.attempted
-        };
+  const promises = Object.entries(distanceStats).map(([distance, stats]) => {
+    return fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        distance,
+        puttsMade: stats.made,
+        puttsAttempted: stats.attempted
+      })
+    });
+  });
 
-        fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-      }
-
-      alert("Scores per distance sent to Google Sheets!");
-    }
-  </script>
-</body>
-</html>
+  Promise.all(promises).then(() => {
+    alert("Scores sent to Google Sheets!");
+  });
+}
