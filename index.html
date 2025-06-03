@@ -151,11 +151,11 @@
       document.getElementById('sendToSheetsBtn').style.display = 'inline-block';
       document.getElementById('newGameBtn').style.display = 'inline-block';
 
-      document.getElementById('result').innerHTML = <h2>Game Over!</h2>
+      document.getElementById('result').innerHTML = `<h2>Game Over!</h2>
         <p>Total Rounds: ${totalRounds}</p>
         <p>Total Putts Made: ${totalPuttsMade}</p>
         <p>Total Putts Attempted: ${totalPuttsAttempted}</p>
-        <p>Final Accuracy: ${overallPercentage.toFixed(1)}%</p>;
+        <p>Final Accuracy: ${overallPercentage.toFixed(1)}%</p>`;
     }
 
     function updateGameDisplay() {
@@ -163,29 +163,29 @@
       document.getElementById('puttsMade').textContent = puttsMade;
     }
 
-function sendToGoogleSheets() {
-  const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
+    function sendToGoogleSheets() {
+      const url = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec";
 
-  const allStats = [];
-  for (let distance in distanceStats) {
-    const stats = distanceStats[distance];
-    allStats.push({
-      distance: parseInt(distance),
-      puttsMade: stats.made,
-      puttsAttempted: stats.attempted
-    });
-  }
+      for (let distance in distanceStats) {
+        const stats = distanceStats[distance];
+        const data = {
+          distance: distance,
+          puttsMade: stats.made,
+          puttsAttempted: stats.attempted
+        };
 
-  fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ stats: allStats }),
-  }).then(() => {
-    alert("All distances sent to Google Sheets!");
-  }).catch((err) => {
-    console.error("Error:", err);
-    alert("Failed to send data.");
-  });
-}
+        fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+      }
+
+      alert("Scores per distance sent to Google Sheets!");
+    }
+  </script>
+</body>
+</html>
