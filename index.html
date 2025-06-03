@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Putting Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -38,6 +38,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div id="setup">
@@ -77,6 +78,7 @@
   <button id="sendToSheetsBtn" style="display: none;" onclick="sendToGoogleSheets()">Send to Google Sheets</button>
   <button id="newGameBtn" style="display: none;" onclick="window.location.reload()">New Game</button>
 
+  <!-- ✅ All JavaScript goes here -->
   <script>
     let puttsPerRound, minDistance, maxDistance, currentDistance;
     let puttsMade = 0;
@@ -151,11 +153,11 @@
       document.getElementById('sendToSheetsBtn').style.display = 'inline-block';
       document.getElementById('newGameBtn').style.display = 'inline-block';
 
-      document.getElementById('result').innerHTML = <h2>Game Over!</h2>
+      document.getElementById('result').innerHTML = `<h2>Game Over!</h2>
         <p>Total Rounds: ${totalRounds}</p>
         <p>Total Putts Made: ${totalPuttsMade}</p>
         <p>Total Putts Attempted: ${totalPuttsAttempted}</p>
-        <p>Final Accuracy: ${overallPercentage.toFixed(1)}%</p>;
+        <p>Final Accuracy: ${overallPercentage.toFixed(1)}%</p>`;
     }
 
     function updateGameDisplay() {
@@ -164,7 +166,7 @@
     }
 
     function sendToGoogleSheets() {
-      const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
+      const url = "https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL_HERE/exec"; // Replace with your deployed Apps Script URL
 
       for (let distance in distanceStats) {
         const stats = distanceStats[distance];
@@ -174,13 +176,13 @@
           puttsAttempted: stats.attempted
         };
 
-        fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
+        fetch(url, {
           method: "POST",
           mode: "no-cors",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ stats: [data] }),
         });
       }
 
