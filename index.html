@@ -165,29 +165,34 @@
       document.getElementById('puttsMade').textContent = puttsMade;
     }
 
-    function sendToGoogleSheets() {
-      const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec"; 
+function sendToGoogleSheets() {
+  const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec"; 
 
-      for (let distance in distanceStats) {
-        const stats = distanceStats[distance];
-        const data = {
-          distance: distance,
-          puttsMade: stats.made,
-          puttsAttempted: stats.attempted
-        };
+  for (let distance in distanceStats) {
+    const stats = distanceStats[distance];
 
-        fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ stats: [data] }),
-        });
-      }
+    // ✅ Skip if no putts attempted (prevents #NUM! errors)
+    if (stats.attempted === 0) continue;
 
-      alert("Scores per distance sent to Google Sheets!");
-    }
+    const data = {
+      distance: distance,
+      puttsMade: stats.made,
+      puttsAttempted: stats.attempted
+    };
+
+    fetch(url, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ stats: [data] }),
+    });
+  }
+
+  alert("Scores per distance sent to Google Sheets!");
+}
+
   </script>
 </body>
 </html>
