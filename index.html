@@ -164,7 +164,7 @@
     }
 
     function sendToGoogleSheets() {
-      const url = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec";
+      const url = "https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec";
 
       for (let distance in distanceStats) {
         const stats = distanceStats[distance];
@@ -174,7 +174,7 @@
           puttsAttempted: stats.attempted
         };
 
-        fetch(url, {
+        fetch("https://script.google.com/macros/s/AKfycbxVXbb7vjfQi-pol4yfe_kfmaWXAYGH9jnxAC-Y3EsEjwQ98-E-2LUvdfsg4q2excNc/exec", {
           method: "POST",
           mode: "no-cors",
           headers: {
